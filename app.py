@@ -9,13 +9,17 @@ st.title("🚨 Bangladesh Crime Data & AI Prediction Portal")
 st.markdown("An End-to-End Machine Learning Pipeline: From Raw Data to Future Forecasts.")
 
 # ২. মেইন ডেটা লোড করা
+# ২. মেইন ডেটা লোড করা
 @st.cache_data
 def load_and_process_data():
     # মূল ফাইলটি রিড করা
     df = pd.read_csv('main_crime_data.csv')
     
-    # ডেট কলাম তৈরি করা
-    df['Date'] = pd.to_datetime(df['Year'].astype(str) + '-' + df['Month'] + '-01')
+    # ডেট কলাম তৈরি করা (errors='coerce' দিলে ভুল টেক্সট থাকলে স্কিপ করবে)
+    df['Date'] = pd.to_datetime(df['Year'].astype(str) + '-' + df['Month'] + '-01', errors='coerce')
+    
+    # যেসব রো-তে আসল ডেট নেই (যেমন ফাঁকা রো বা হেডারের ডুপ্লিকেট), সেগুলো মুছে ফেলা
+    df = df.dropna(subset=['Date'])
     
     # সব ডিপার্টমেন্টের ডেটা মাস অনুযায়ী যোগ করা
     monthly_data = df.groupby('Date')['Total Cases'].sum().reset_index()

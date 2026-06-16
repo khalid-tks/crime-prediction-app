@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # --- 1. Page Configuration (Polished Look) ---
 st.set_page_config(page_title="Crime Analytics AI", layout="wide", initial_sidebar_state="collapsed")
 st.title("🛡️ Bangladesh Crime Analytics & AI Prediction Portal")
-st.markdown("A Data-Driven Decision Support System for Law Enforcement")
+st.markdown("A Data-Driven Approach Bangladesh perspective ")
 
 # --- 2. Data Loading & Cleaning ---
 @st.cache_data

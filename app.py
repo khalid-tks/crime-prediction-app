@@ -10,16 +10,25 @@ st.markdown("An End-to-End Machine Learning Pipeline: From Raw Data to Future Fo
 
 # ২. মেইন ডেটা লোড করা
 # ২. মেইন ডেটা লোড করা
+# ২. মেইন ডেটা লোড করা
 @st.cache_data
 def load_and_process_data():
     # মূল ফাইলটি রিড করা
     df = pd.read_csv('main_crime_data.csv')
     
-    # ডেট কলাম তৈরি করা (errors='coerce' দিলে ভুল টেক্সট থাকলে স্কিপ করবে)
-    df['Date'] = pd.to_datetime(df['Year'].astype(str) + '-' + df['Month'] + '-01', errors='coerce')
+    # Year এবং Month কলাম থেকে অদৃশ্য স্পেস (whitespace) মুছে ফেলা
+    df['Year'] = df['Year'].astype(str).str.strip()
+    df['Month'] = df['Month'].astype(str).str.strip()
     
-    # যেসব রো-তে আসল ডেট নেই (যেমন ফাঁকা রো বা হেডারের ডুপ্লিকেট), সেগুলো মুছে ফেলা
+    # পাইথনকে দিয়ে অটোমেটিক ডেট তৈরি করা (যেমন: "2020 January" -> 2020-01-01)
+    df['Date'] = pd.to_datetime(df['Year'] + ' ' + df['Month'], errors='coerce')
+    
+    # যেসব রো-তে আসল ডেট নেই, সেগুলো স্কিপ করা
     df = df.dropna(subset=['Date'])
+    
+    # Total Cases কলামটি নাম্বার (Numeric) হিসেবে নিশ্চিত করা (কমা থাকলে সরিয়ে দেওয়া)
+    df['Total Cases'] = pd.to_numeric(df['Total Cases'].astype(str).str.replace(',', ''), errors='coerce')
+    df = df.dropna(subset=['Total Cases'])
     
     # সব ডিপার্টমেন্টের ডেটা মাস অনুযায়ী যোগ করা
     monthly_data = df.groupby('Date')['Total Cases'].sum().reset_index()

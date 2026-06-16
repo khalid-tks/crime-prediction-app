@@ -11,22 +11,25 @@ st.markdown("An End-to-End Machine Learning Pipeline: From Raw Data to Future Fo
 # ২. মেইন ডেটা লোড করা
 # ২. মেইন ডেটা লোড করা
 # ২. মেইন ডেটা লোড করা
+# ২. মেইন ডেটা লোড করা
 @st.cache_data
 def load_and_process_data():
     # মূল ফাইলটি রিড করা
     df = pd.read_csv('main_crime_data.csv')
     
-    # Year এবং Month কলাম থেকে অদৃশ্য স্পেস (whitespace) মুছে ফেলা
-    df['Year'] = df['Year'].astype(str).str.strip()
+    # Year কলামের .0 সমস্যা দূর করা (যেমন 2020.0 থেকে শুধু 2020 বানানো)
+    df['Year'] = df['Year'].astype(str).str.split('.').str[0].str.strip()
+    
+    # Month কলামের অদৃশ্য স্পেস ক্লিন করা
     df['Month'] = df['Month'].astype(str).str.strip()
     
-    # পাইথনকে দিয়ে অটোমেটিক ডেট তৈরি করা (যেমন: "2020 January" -> 2020-01-01)
+    # ডেট তৈরি করা
     df['Date'] = pd.to_datetime(df['Year'] + ' ' + df['Month'], errors='coerce')
     
     # যেসব রো-তে আসল ডেট নেই, সেগুলো স্কিপ করা
     df = df.dropna(subset=['Date'])
     
-    # Total Cases কলামটি নাম্বার (Numeric) হিসেবে নিশ্চিত করা (কমা থাকলে সরিয়ে দেওয়া)
+    # Total Cases কলামটি নাম্বার (Numeric) হিসেবে নিশ্চিত করা
     df['Total Cases'] = pd.to_numeric(df['Total Cases'].astype(str).str.replace(',', ''), errors='coerce')
     df = df.dropna(subset=['Total Cases'])
     

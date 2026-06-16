@@ -55,7 +55,7 @@ with tab1:
     # Clean Visuals using Streamlit's native beautiful charts
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown(f"**🔥 Top 5 Crime Hotspots (Where to deploy forces?)**")
+        st.markdown(f"**🚨 Top 5 Crime Hotspots (Where to deploy forces?)**")
         st.bar_chart(hotspots.head(5), color="#ff4b4b")
     
     with col_b:
@@ -66,13 +66,13 @@ with tab1:
 # TAB 2: DYNAMIC AI PREDICTION
 # ==========================================
 with tab2:
-    st.subheader("🔮 Dynamic AI Forecasting Studio")
+    st.subheader(" AI Forecasting ")
     st.markdown("Select a specific crime category and forecast range to generate live predictions.")
     
     # User Inputs (Clean side-by-side layout)
     col_sel, col_slide = st.columns(2)
     with col_sel:
-        target_crime = st.selectbox("📌 Select Crime Type to Predict:", ['Total Cases'] + crime_cols)
+        target_crime = st.selectbox(" Select Crime Type to Predict:", ['Total Cases'] + crime_cols)
     with col_slide:
         forecast_period = st.slider("📅 Select Forecast Range (Months):", min_value=3, max_value=36, value=12, step=1)
         

@@ -55,10 +55,13 @@ with col2:
     ax1.set_title("Total Crimes Per Month")
     st.pyplot(fig1)
 
-# ৪. সেকশন ২: মেশিন লার্নিং প্রেডিকশন (Live AI Forecast)
+# ৪. সেকশন ২: মেশিন লার্নিং প্রেডিকশন (Advanced AI Forecast)
 st.divider()
-st.header("🤖 2. Live Machine Learning Forecast (Next 12 Months)")
-st.write("Our integrated Meta Prophet model is analyzing the historical patterns to predict future trends...")
+st.header("🤖 2. Advanced AI Prediction Analysis")
+st.markdown("Interactive forecasting powered by Meta's Prophet algorithm. Adjust the slider to forecast further into the future.")
+
+# ডায়নামিক স্লাইডার (কত মাসের প্রেডিকশন চান)
+forecast_period = st.slider("Select Forecast Period (Months):", min_value=3, max_value=36, value=12, step=1)
 
 # Prophet এর জন্য ডেটা রেডি করা
 ml_data = monthly_df.rename(columns={'Date': 'ds', 'Total Cases': 'y'})
@@ -66,22 +69,58 @@ ml_data = monthly_df.rename(columns={'Date': 'ds', 'Total Cases': 'y'})
 # মডেল ট্রেইন ও প্রেডিক্ট করা
 m = Prophet(interval_width=0.95, yearly_seasonality=True)
 m.fit(ml_data)
-future = m.make_future_dataframe(periods=12, freq='MS')
+future = m.make_future_dataframe(periods=forecast_period, freq='MS')
 forecast = m.predict(future)
 
-# প্রেডিকশন গ্রাফ আঁকা
+# --- নতুন: KPI মেট্রিক্স (Smart Insights) ---
+st.subheader("💡 Key Future Insights")
+col1, col2, col3 = st.columns(3)
+
+# আগামী মাসের প্রেডিকশন বের করা
+next_month_pred = int(forecast['yhat'].iloc[-forecast_period])
+# ফোরকাস্টের মধ্যে সর্বোচ্চ সংখ্যা
+max_pred = int(forecast['yhat'].tail(forecast_period).max())
+
+col1.metric(label="Next Month's Expected Cases", value=f"{next_month_pred:,}")
+col2.metric(label="Peak Expected Cases (Within Forecast)", value=f"{max_pred:,}")
+col3.metric(label="Model Confidence Interval", value="95%")
+
+# --- প্রেডিকশন গ্রাফ আঁকা ---
+st.subheader("📈 Interactive Future Trend")
 fig2, ax2 = plt.subplots(figsize=(12, 5))
 # হিস্টোরিকাল লাইন
 ax2.plot(ml_data['ds'], ml_data['y'], label='Historical Data', color='blue', marker='o')
 # প্রেডিকশন লাইন
-ax2.plot(forecast['ds'].tail(12), forecast['yhat'].tail(12), label='AI Forecast', color='red', linestyle='--', marker='o')
-ax2.fill_between(forecast['ds'].tail(12), forecast['yhat_lower'].tail(12), forecast['yhat_upper'].tail(12), color='red', alpha=0.2, label='Confidence Interval')
+ax2.plot(forecast['ds'].tail(forecast_period), forecast['yhat'].tail(forecast_period), label='AI Forecast', color='red', linestyle='--', marker='o')
+ax2.fill_between(forecast['ds'].tail(forecast_period), forecast['yhat_lower'].tail(forecast_period), forecast['yhat_upper'].tail(forecast_period), color='red', alpha=0.2, label='Confidence Interval')
 
-ax2.set_title("Historical vs Predicted Crime Trends")
-ax2.set_xlabel("Year")
-ax2.set_ylabel("Total Cases")
+ax2.set_xlabel("Year & Month")
+ax2.set_ylabel("Total Crime Cases")
 ax2.legend()
-ax2.grid(True)
+ax2.grid(True, linestyle='--', alpha=0.6)
 st.pyplot(fig2)
 
-st.success("✅ End-to-End Pipeline Executed Successfully!")
+# --- নতুন: AI Components (Trend & Seasonality) ---
+st.subheader("⚙️ Model Decomposition (Why does the AI predict this?)")
+st.write("This section breaks down the AI's prediction into overall growth trends and yearly seasonal patterns.")
+with st.expander("Click to view AI Trend & Seasonality Analysis"):
+    fig3 = m.plot_components(forecast)
+    st.pyplot(fig3)
+
+# --- নতুন: ডেটা ডাউনলোড অপশন ---
+st.subheader("📋 Forecasted Dataset Export")
+with st.expander("View & Download Future Data"):
+    forecast_export = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_period)
+    forecast_export = forecast_export.rename(columns={'ds': 'Date', 'yhat': 'Predicted Cases', 'yhat_lower': 'Minimum Range', 'yhat_upper': 'Maximum Range'})
+    
+    # ডেট ফরম্যাট সুন্দর করা
+    forecast_export['Date'] = forecast_export['Date'].dt.strftime('%B %Y')
+    # দশমিক সংখ্যা রাউন্ড (Round) করা
+    forecast_export.iloc[:, 1:] = forecast_export.iloc[:, 1:].round(0).astype(int)
+    
+    st.dataframe(forecast_export, use_container_width=True)
+    
+    csv = forecast_export.to_csv(index=False).encode('utf-8')
+    st.download_button(label="Download Predicted Data as CSV", data=csv, file_name='AI_Crime_Forecast.csv', mime='text/csv')
+
+st.success("✅ Defense-Ready AI Pipeline Executed Successfully!")

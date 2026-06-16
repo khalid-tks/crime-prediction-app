@@ -61,6 +61,34 @@ with tab1:
     with col_b:
         st.markdown(f"**📈 Crimes of Highest Concern (What to focus on?)**")
         st.bar_chart(total_crimes_by_type.head(5), color="#1f77b4")
+        # ==========================================
+    # NEW FEATURE: Interactive Department Analytics
+    # ==========================================
+    st.divider()
+    st.subheader("🏢 Interactive Department & Crime Analysis")
+    st.markdown("Analyze specific crimes across departments, or view the top crimes within a specific unit.")
+    
+    col_x, col_y = st.columns(2)
+    
+    with col_x:
+        st.markdown("**🔍 1. Find Top Departments by Crime**")
+        # ড্রপডাউন থেকে ক্রাইম সিলেক্ট 
+        selected_crime_insight = st.selectbox("Select a Crime Type:", crime_cols, key='crime_sel')
+        
+        # কোন ডিপার্টমেন্টে এই ক্রাইম সবচেয়ে বেশি 
+        crime_by_unit = df.groupby('Unit Name')[selected_crime_insight].sum().sort_values(ascending=False).head(5)
+        st.bar_chart(crime_by_unit, color="#ff4b4b")
+        st.success(f"💡 Insight: **{crime_by_unit.index[0]}** recorded the highest number of **{selected_crime_insight}** cases.")
+
+    with col_y:
+        st.markdown("**🏢 2. Find Top Crimes by Department**")
+        # ড্রপডাউন থেকে পুলিশ ইউনিট সিলেক্ট
+        selected_unit = st.selectbox("Select a Police Unit:", df['Unit Name'].unique(), key='unit_sel')
+        
+        # ওই ইউনিটে কোন ক্রাইম সবচেয়ে বেশি 
+        unit_specific_data = df[df['Unit Name'] == selected_unit][crime_cols].sum().sort_values(ascending=False).head(5)
+        st.bar_chart(unit_specific_data, color="#1f77b4")
+        st.info(f"💡 Insight: **{unit_specific_data.index[0]}** is the most frequent crime category in **{selected_unit}**.")
 
 # ==========================================
 # TAB 2: DYNAMIC AI PREDICTION
